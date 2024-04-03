@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model comments {
+  comment_id Int       @id @default(autoincrement())
+  content    String?   @db.VarChar(1000)
+  user_id    Int?
+  image_id   Int?
+  create_at  DateTime? @db.DateTime(0)
+  isDelete   Boolean?  @default(false)
+  users      users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "comments_ibfk_1")
+  images     images?   @relation(fields: [image_id], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "comments_ibfk_2")
+
+  @@index([image_id], map: "image_id")
+  @@index([user_id], map: "user_id")
+}
+
+model images {
+  image_id    Int        @id @default(autoincrement())
+  image_name  String     @db.VarChar(50)
+  url         String?    @db.VarChar(255)
+  description String?    @db.VarChar(1000)
+  user_id     Int?
+  create_at   DateTime?  @db.DateTime(0)
+  isDelete    Boolean?   @default(false)
+  comments    comments[]
+  users       users?     @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "images_ibfk_1")
+  saves       saves[]
+
+  @@index([user_id], map: "user_id")
+}
+
+model saves {
+  save_id   Int       @id @default(autoincrement())
+  user_id   Int?
+  image_id  Int?
+  create_at DateTime? @db.DateTime(0)
+  isSave    Boolean?  @default(false)
+  users     users?    @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "saves_ibfk_1")
+  images    images?   @relation(fields: [image_id], references: [image_id], onDelete: NoAction, onUpdate: NoAction, map: "saves_ibfk_2")
+
+  @@index([image_id], map: "image_id")
+  @@index([user_id], map: "user_id")
+}
+
+model users {
+  user_id       Int        @id @default(autoincrement())
+  user_name     String     @db.VarChar(50)
+  age           Int
+  email         String     @db.VarChar(50)
+  password      String     @db.VarChar(255)
+  avatar        String?    @db.VarChar(255)
+  create_at     DateTime?  @db.DateTime(0)
+  refresh_token String?    @db.VarChar(1000)
+  comments      comments[]
+  images        images[]
+  saves         saves[]
+}
